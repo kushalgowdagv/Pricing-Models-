@@ -211,102 +211,118 @@ def calculate_time_to_expiry(expiration_date):
     days_to_expiry = (expiry_date - today).days
     return days_to_expiry / 365.0
 
+# def get_option_strike_prices(ticker):
+#     # Fetch the ticker data
+#     stock = yf.Ticker(ticker)
+    
+#     # Get the expiration dates for options
+#     expirations = stock.options
+    
+#     # Dictionary to store strike prices for each expiration
+#     strike_prices = {}
+    
+#     for expiration in expirations:
+#         # Fetch the options chain for each expiration date
+#         options_chain = stock.option_chain(expiration)
+        
+#         # Extract the call and put strikes
+#         call_strikes = options_chain.calls['strike'].tolist()
+#         put_strikes = options_chain.puts['strike'].tolist()
+        
+#         # Store the strike prices in the dictionary
+#         strike_prices[expiration] = {
+#             'calls': call_strikes,
+#             'puts': put_strikes
+#         }
+    
+#     return strike_prices
 def get_option_strike_prices(ticker):
-    # Fetch the ticker data
     stock = yf.Ticker(ticker)
-    
-    # Get the expiration dates for options
     expirations = stock.options
-    
-    # Dictionary to store strike prices for each expiration
     strike_prices = {}
-    
+
     for expiration in expirations:
-        # Fetch the options chain for each expiration date
-        options_chain = stock.option_chain(expiration)
-        
-        # Extract the call and put strikes
-        call_strikes = options_chain.calls['strike'].tolist()
-        put_strikes = options_chain.puts['strike'].tolist()
-        
-        # Store the strike prices in the dictionary
-        strike_prices[expiration] = {
-            'calls': call_strikes,
-            'puts': put_strikes
-        }
-    
+        try:
+            options_chain = stock.option_chain(expiration)
+            if 'calls' in options_chain._fields and 'puts' in options_chain._fields:
+                call_strikes = options_chain.calls['strike'].tolist()
+                put_strikes = options_chain.puts['strike'].tolist()
+                strike_prices[expiration] = {
+                    'calls': call_strikes,
+                    'puts': put_strikes
+                }
+            else:
+                strike_prices[expiration] = {
+                    'calls': [],
+                    'puts': []
+                }
+        except Exception as e:
+            st.sidebar.write(f"Error fetching options for {expiration}: {e}")
+
     return strike_prices
 
 
 
+
 def main():
-    # indices_names = {'AAPL': 'Apple Inc.', 'NVDA': 'NVIDIA Corporation', '^RUT': 'Russell 2000 Index', '^VIX': 'CBOE Volatility Index (VIX)',
-    #     'IWM': 'iShares Russell 2000 ETF', 'TSLA': 'Tesla, Inc.', 'QQQ': 'Invesco QQQ Trust', '^SPX': 'S&P 500 Index'}
-
-    # st.sidebar.header("Select an Index")
-    # selected_index = st.sidebar.selectbox(
-    #     "Select an underlying asset", 
-    #     options=list(indices_names.keys()), 
-    #     key='underlying_asset'
-    # )
-    # st.sidebar.write(f"Selected asset: **{indices_names[selected_index]}**")
-
-    # # Fetching and displaying available expirations for the selected index
-    # expirations = fetch_expiry_dates(selected_index)
-    # expiration_date = st.sidebar.selectbox(
-    #     "Select Expiration Date", 
-    #     options=expirations, 
-    #     key='expiration_date'
-    # )
-    
-    # st.sidebar.write(f"Selected expiration: **{expiration_date}**")
-
-    # # Fetching the current price for the selected index
-    # nifty_price = fetch_data(selected_index)
-
-    # # selected_index = st.sidebar.selectbox("Select an underlying asset", options=list(indices_names.keys()), key='underlying_asset')
-    # # st.sidebar.write(f"Selected asset: **{indices_names[selected_index]}**")
-
-    # # # Fetching the current price for the selected index
-    # # spot_price = yf.download(selected_index, interval='1d', period='1d')['Close'].iloc[-1]
-
-    # # nifty_price = fetch_data(selected_index)
+    indices_names = {'AAPL': 'Apple Inc.', 'NVDA': 'NVIDIA Corporation', '^RUT': 'Russell 2000 Index', '^VIX': 'CBOE Volatility Index (VIX)',
+        'IWM': 'iShares Russell 2000 ETF', 'TSLA': 'Tesla, Inc.', 'QQQ': 'Invesco QQQ Trust', '^SPX': 'S&P 500 Index'}
 
     st.sidebar.header("Select an Index")
-    indices_names = {'AAPL': 'Apple Inc.', 'TSLA': 'Tesla, Inc.', 'QQQ': 'Invesco QQQ Trust'}
-    
     selected_index = st.sidebar.selectbox(
         "Select an underlying asset", 
         options=list(indices_names.keys()), 
         key='underlying_asset'
     )
-    
     st.sidebar.write(f"Selected asset: **{indices_names[selected_index]}**")
 
-    # Fetch current stock price
-    stock_data = yf.Ticker(selected_index)
-    current_price = stock_data.history(period='1d').Close.iloc[-1]
-    
-    st.sidebar.write(f"Current Stock Price: **{current_price:.2f}**")
-
-    # Fetch available expirations and strike prices
-    strike_prices_data = get_option_strike_prices(selected_index)
-    expiration_dates = list(strike_prices_data.keys())
-    
-    # Let user select expiration date
+    # Fetching and displaying available expirations for the selected index
+    expirations = fetch_expiry_dates(selected_index)
     expiration_date = st.sidebar.selectbox(
         "Select Expiration Date", 
-        options=expiration_dates, 
+        options=expirations, 
         key='expiration_date'
     )
     
     st.sidebar.write(f"Selected expiration: **{expiration_date}**")
 
+    # Fetching the current price for the selected index
+    nifty_price = fetch_data(selected_index)
+
+    # selected_index = st.sidebar.selectbox("Select an underlying asset", options=list(indices_names.keys()), key='underlying_asset')
+    # st.sidebar.write(f"Selected asset: **{indices_names[selected_index]}**")
+
+    # # Fetching the current price for the selected index
+    # spot_price = yf.download(selected_index, interval='1d', period='1d')['Close'].iloc[-1]
+
+    # nifty_price = fetch_data(selected_index)
+
+
+
+    # Fetch current stock price
+    # stock_data = yf.Ticker(selected_index)
+    # current_price = stock_data.history(period='1d').Close.iloc[-1]
+    
+    # st.sidebar.write(f"Current Stock Price: **{current_price:.2f}**")
+
+    # Fetch available expirations and strike prices
+    strike_prices_data = get_option_strike_prices(selected_index)
+    expiration_dates = list(strike_prices_data.keys())
+    
+    # # Let user select expiration date
+    # expiration_date = st.sidebar.selectbox(
+    #     "Select Expiration Date", 
+    #     options=expiration_dates, 
+    #     key='expiration_date'
+    # )
+    
+    # st.sidebar.write(f"Selected expiration: **{expiration_date}**")
+
     # Get strike prices for the selected expiration
     call_strikes = strike_prices_data[expiration_date]['calls']
     
     # Find the closest strike price to the current stock price
-    closest_strike = min(call_strikes, key=lambda x: abs(x - current_price))
+    closest_strike = min(call_strikes, key=lambda x: abs(x - nifty_price))
     
     # Create a select box to allow users to choose a strike price
     selected_strike = st.sidebar.selectbox(
@@ -337,9 +353,10 @@ def main():
         st.title("Black-Scholes Option Pricing and Greek Visualizations")
         st.sidebar.header("Inputs")
         spot_price = st.sidebar.number_input('Stock Price', min_value=1.0, max_value=40000.0, value=nifty_price, step=5.0, key='spot_price')
-        strike_price = st.sidebar.number_input("Strike Price", value=selected_strike, min_value=1.0, max_value=40000.0, key='strike_price')
-        st.sidebar.write(f"Time to expiration in Days : **{int(round(time_to_expiry * 365,2)) }**")
-        # time_to_expiry = st.sidebar.number_input("Time to Expiry (Years)", value=1.0, key='time_to_expiry')
+        strike_price = st.sidebar.number_input("Strike Price", value=selected_strike, min_value=1.0, max_value=40000.0, key='selected_strike')
+        # st.sidebar.write(f"Time to expiration in Days : **{int(round(time_to_expiry * 365,2)) }**")
+        time_to_expiry_val = st.sidebar.number_input("Time to Expiry (Days)", value=int(round(time_to_expiry * 365,2)), key='time_to_expiry')
+        time_to_expiry=time_to_expiry_val/365
         option_type = st.selectbox("Option Type", ['Call', 'Put'], key='option_type')
         volatility = st.sidebar.number_input('Volatility (%)', min_value=1.0, max_value=100.0, value=20.0, step=0.25, key='volatility')
         risk_free_rate = st.sidebar.number_input('Risk Free Rate (%)', min_value=0.0, max_value=20.0, value=5.0, step=0.01, key='risk_free_rate')
@@ -363,9 +380,10 @@ def main():
         num_steps = st.sidebar.number_input("Number of Steps", value=252, min_value=1, key='num_steps_mc')
         num_simulations = st.sidebar.number_input("Number of Simulations", value=1000, min_value=500, max_value=2000, step=100, key='num_simulations')
         spot_price = st.sidebar.number_input('Stock Price', min_value=1.0, max_value=40000.0, value=nifty_price, step=5.0, key='spot_price')
-        strike_price = st.sidebar.number_input("Strike Price", value=selected_strike, min_value=1.0, max_value=40000.0, key='strike_price')
-        st.sidebar.write(f"Time to expiration in Days : **{int(round(time_to_expiry * 365,2)) }**")
-        # time_to_expiry = st.sidebar.number_input("Time to Expiry (Years)", value=1.0, key='time_to_expiry')
+        strike_price = st.sidebar.number_input("Strike Price", value=selected_strike, min_value=1.0, max_value=40000.0, key='selected_strike')
+        # st.sidebar.write(f"Time to expiration in Days : **{int(round(time_to_expiry * 365,2)) }**")
+        time_to_expiry_val = st.sidebar.number_input("Time to Expiry (Days)", value=int(round(time_to_expiry * 365,2)), key='time_to_expiry')
+        time_to_expiry=time_to_expiry_val/365
         volatility = st.sidebar.number_input('Volatility (%)', min_value=1.0, max_value=100.0, value=20.0, step=0.25, key='volatility')
         risk_free_rate = st.sidebar.number_input('Risk Free Rate (%)', min_value=0.0, max_value=20.0, value=5.0, step=0.01, key='risk_free_rate')
         
@@ -381,10 +399,11 @@ def main():
         st.title("Binomial Option Pricing and Forecasting Asset Prices")
 
         option_type = st.selectbox("Option Type", ['Call', 'Put'], key='option_type')
-        spot_price = st.sidebar.number_input("Stock Price", min_value=0.0, max_value=40000.0, value=24975.0, step=5.0)
-        strike_price = st.sidebar.number_input("Strike Price", value=selected_strike, min_value=1.0, max_value=40000.0, key='strike_price')
-        st.sidebar.write(f"Time to expiration in Days : **{int(round(time_to_expiry * 365,2)) }**")
-        # time_to_expiry = st.sidebar.number_input("Time to Expiry (Years)", min_value=0.01, max_value=1.0, value=1.0, step=0.01)
+        spot_price = st.sidebar.number_input("Stock Price", min_value=0.0, max_value=40000.0, value=nifty_price, step=5.0)
+        strike_price = st.sidebar.number_input("Strike Price", value=selected_strike, min_value=1.0, max_value=40000.0, key='selected_strike')
+        # st.sidebar.write(f"Time to expiration in Days : **{int(round(time_to_expiry * 365,2)) }**")
+        time_to_expiry_val = st.sidebar.number_input("Time to Expiry (Days)", value=int(round(time_to_expiry * 365,2)), key='time_to_expiry')
+        time_to_expiry=time_to_expiry_val/365
         volatility = st.sidebar.number_input("Volatility (%)", min_value=0.0, max_value=100.0, value=20.0) / 100
         risk_free_rate = st.sidebar.number_input("Risk Free Rate (%)", min_value=0.0, max_value=20.0, value=5.0) / 100
         num_steps = st.sidebar.number_input("Number of Steps", value=10, min_value=10, max_value=50, step=10)
