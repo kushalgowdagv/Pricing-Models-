@@ -190,20 +190,53 @@ def fetch_data(selected_index):
         return nifty_latest
     except:
         return 25000.0 
+    
+def fetch_expiry_dates(selected_index):
+    """Fetches expiry dates for the selected index if available."""
+    try:
+        ticker = yf.Ticker(selected_index)
+        options = ticker.options
+        if options:
+            return options
+        else:
+            return ["No options available"]
+    except Exception as e:
+        st.sidebar.write(f"Error fetching options for {selected_index}: {e}")
+        return ["Error fetching options"]
+    
 
 def main():
     indices_names = {'AAPL': 'Apple Inc.', 'NVDA': 'NVIDIA Corporation', '^RUT': 'Russell 2000 Index', '^VIX': 'CBOE Volatility Index (VIX)',
         'IWM': 'iShares Russell 2000 ETF', 'TSLA': 'Tesla, Inc.', 'QQQ': 'Invesco QQQ Trust', '^SPX': 'S&P 500 Index'}
 
-    selected_index = st.sidebar.selectbox("Select an underlying asset", options=list(indices_names.keys()), key='underlying_asset')
+    st.sidebar.header("Select an Index")
+    selected_index = st.sidebar.selectbox(
+        "Select an underlying asset", 
+        options=list(indices_names.keys()), 
+        key='underlying_asset'
+    )
     st.sidebar.write(f"Selected asset: **{indices_names[selected_index]}**")
 
+    # Fetching and displaying available expirations for the selected index
+    expirations = fetch_expiry_dates(selected_index)
+    expiration_date = st.sidebar.selectbox(
+        "Select Expiration Date", 
+        options=expirations, 
+        key='expiration_date'
+    )
+    
+    st.sidebar.write(f"Selected expiration: **{expiration_date}**")
+
     # Fetching the current price for the selected index
-    spot_price = yf.download(selected_index, interval='1d', period='1d')['Close'].iloc[-1]
-
-
-
     nifty_price = fetch_data(selected_index)
+
+    # selected_index = st.sidebar.selectbox("Select an underlying asset", options=list(indices_names.keys()), key='underlying_asset')
+    # st.sidebar.write(f"Selected asset: **{indices_names[selected_index]}**")
+
+    # # Fetching the current price for the selected index
+    # spot_price = yf.download(selected_index, interval='1d', period='1d')['Close'].iloc[-1]
+
+    # nifty_price = fetch_data(selected_index)
 
     strike_price = 25000.0
     time_to_expiry = 1.0
