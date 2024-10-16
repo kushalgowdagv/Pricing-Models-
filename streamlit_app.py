@@ -183,16 +183,27 @@ def binomial_pricing_visualization(spot_price, strike_price, time_to_expiry, vol
  
     return fig
 
-def fetch_nifty():
+def fetch_data(selected_index):
     try:
-        nifty_latest = yf.download('^NSEI', interval = '1m', period = '1d')
-        nifty_latest = round(nifty_latest.Close[-1], 1)
+        nifty_latest = yf.download(selected_index, interval = '1m', period = '1d')
+        nifty_latest = round(nifty_latest.Close.iloc[-1], 1)
         return nifty_latest
     except:
-        return 25000.0
+        return 25000.0 
 
 def main():
-    nifty_price = fetch_nifty()
+    indices_names = {'AAPL': 'Apple Inc.', 'NVDA': 'NVIDIA Corporation', '^RUT': 'Russell 2000 Index', '^VIX': 'CBOE Volatility Index (VIX)',
+        'IWM': 'iShares Russell 2000 ETF', 'TSLA': 'Tesla, Inc.', 'QQQ': 'Invesco QQQ Trust', '^SPX': 'S&P 500 Index'}
+
+    selected_index = st.sidebar.selectbox("Select an underlying asset", options=list(indices_names.keys()), key='underlying_asset')
+    st.sidebar.write(f"Selected asset: **{indices_names[selected_index]}**")
+
+    # Fetching the current price for the selected index
+    spot_price = yf.download(selected_index, interval='1d', period='1d')['Close'].iloc[-1]
+
+
+
+    nifty_price = fetch_data(selected_index)
 
     strike_price = 25000.0
     time_to_expiry = 1.0
