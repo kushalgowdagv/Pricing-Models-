@@ -203,7 +203,13 @@ def fetch_expiry_dates(selected_index):
     except Exception as e:
         st.sidebar.write(f"Error fetching options for {selected_index}: {e}")
         return ["Error fetching options"]
-    
+
+def calculate_time_to_expiry(expiration_date):
+    """Calculates time to expiry in years from today's date to the expiration date."""
+    today = datetime.now().date()
+    expiry_date = datetime.strptime(expiration_date, "%Y-%m-%d").date()
+    days_to_expiry = (expiry_date - today).days
+    return days_to_expiry / 365.0
 
 def main():
     indices_names = {'AAPL': 'Apple Inc.', 'NVDA': 'NVIDIA Corporation', '^RUT': 'Russell 2000 Index', '^VIX': 'CBOE Volatility Index (VIX)',
@@ -239,7 +245,7 @@ def main():
     # nifty_price = fetch_data(selected_index)
 
     strike_price = 25000.0
-    time_to_expiry = 1.0
+    time_to_expiry = calculate_time_to_expiry(expiration_date)
     option_type = 'Call'
     spot_price = nifty_price
     volatility = 20.0
