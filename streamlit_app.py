@@ -209,33 +209,9 @@ def calculate_time_to_expiry(expiration_date):
     today = datetime.now().date()
     expiry_date = datetime.strptime(expiration_date, "%Y-%m-%d").date()
     days_to_expiry = (expiry_date - today).days
-    return days_to_expiry / 365.0
+    return days_to_expiry / 252.0
 
-# def get_option_strike_prices(ticker):
-#     # Fetch the ticker data
-#     stock = yf.Ticker(ticker)
-    
-#     # Get the expiration dates for options
-#     expirations = stock.options
-    
-#     # Dictionary to store strike prices for each expiration
-#     strike_prices = {}
-    
-#     for expiration in expirations:
-#         # Fetch the options chain for each expiration date
-#         options_chain = stock.option_chain(expiration)
-        
-#         # Extract the call and put strikes
-#         call_strikes = options_chain.calls['strike'].tolist()
-#         put_strikes = options_chain.puts['strike'].tolist()
-        
-#         # Store the strike prices in the dictionary
-#         strike_prices[expiration] = {
-#             'calls': call_strikes,
-#             'puts': put_strikes
-#         }
-    
-#     return strike_prices
+
 def get_option_strike_prices(ticker):
     stock = yf.Ticker(ticker)
     expirations = stock.options
@@ -354,12 +330,13 @@ def main():
         st.sidebar.header("Inputs")
         spot_price = st.sidebar.number_input('Stock Price', min_value=1.0, max_value=40000.0, value=nifty_price, step=5.0, key='spot_price')
         strike_price = st.sidebar.number_input("Strike Price", value=selected_strike, min_value=1.0, max_value=40000.0, key='selected_strike')
-        # st.sidebar.write(f"Time to expiration in Days : **{int(round(time_to_expiry * 365,2)) }**")
-        time_to_expiry_val = st.sidebar.number_input("Time to Expiry (Days)", value=int(round(time_to_expiry * 365,2)), key='time_to_expiry')
-        time_to_expiry=time_to_expiry_val/365
+        # st.sidebar.write(f"Time to expiration in Days : **{int(round(time_to_expiry * 252,2)) }**")
+        time_to_expiry_val = st.sidebar.number_input("Time to Expiry (Days)", value=int(round(time_to_expiry * 252,2)), key='time_to_expiry')
+        time_to_expiry=time_to_expiry_val/252
         option_type = st.selectbox("Option Type", ['Call', 'Put'], key='option_type')
-        volatility = st.sidebar.number_input('Volatility (%)', min_value=1.0, max_value=100.0, value=20.0, step=0.25, key='volatility')
-        risk_free_rate = st.sidebar.number_input('Risk Free Rate (%)', min_value=0.0, max_value=20.0, value=5.0, step=0.01, key='risk_free_rate')
+        # volatility = st.sidebar.number_input('Volatility (%)', min_value=1.0, max_value=100.0, value=20.0, step=0.25, key='volatility')
+        volatility = st.sidebar.slider('Volatility (%)', min_value=1.0, max_value=100.0, value=20.0, step=0.5, key='volatility')
+        risk_free_rate = st.sidebar.slider('Risk Free Rate (%)', min_value=0.0, max_value=20.0, value=5.0, step=0.1, key='risk_free_rate')
         
         st.sidebar.header("Inputs for Black Scholes")
         bs_model = BlackScholes(r=risk_free_rate / 100, s=spot_price, k=strike_price, t=time_to_expiry, sigma=volatility / 100)
@@ -381,12 +358,13 @@ def main():
         num_simulations = st.sidebar.number_input("Number of Simulations", value=1000, min_value=500, max_value=2000, step=100, key='num_simulations')
         spot_price = st.sidebar.number_input('Stock Price', min_value=1.0, max_value=40000.0, value=nifty_price, step=5.0, key='spot_price')
         strike_price = st.sidebar.number_input("Strike Price", value=selected_strike, min_value=1.0, max_value=40000.0, key='selected_strike')
-        # st.sidebar.write(f"Time to expiration in Days : **{int(round(time_to_expiry * 365,2)) }**")
+        # st.sidebar.write(f"Time to expiration in Days : **{int(round(time_to_expiry * 252,2)) }**")
         time_to_expiry_val = st.sidebar.number_input("Time to Expiry (Days)", value=int(round(time_to_expiry * 365,2)), key='time_to_expiry')
-        time_to_expiry=time_to_expiry_val/365
-        volatility = st.sidebar.number_input('Volatility (%)', min_value=1.0, max_value=100.0, value=20.0, step=0.25, key='volatility')
-        risk_free_rate = st.sidebar.number_input('Risk Free Rate (%)', min_value=0.0, max_value=20.0, value=5.0, step=0.01, key='risk_free_rate')
-        
+        time_to_expiry=time_to_expiry_val/252
+        # volatility = st.sidebar.number_input('Volatility (%)', min_value=1.0, max_value=100.0, value=20.0, step=0.25, key='volatility')
+        # risk_free_rate = st.sidebar.number_input('Risk Free Rate (%)', min_value=0.0, max_value=20.0, value=5.0, step=0.01, key='risk_free_rate')
+        volatility = st.sidebar.slider('Volatility (%)', min_value=1.0, max_value=100.0, value=20.0, step=0.5, key='volatility')
+        risk_free_rate = st.sidebar.slider('Risk Free Rate (%)', min_value=0.0, max_value=20.0, value=5.0, step=0.1, key='risk_free_rate')
         bs_model = BlackScholes(r=risk_free_rate / 100, s=spot_price, k=strike_price, t=time_to_expiry, sigma=volatility / 100)
         monte_carlo_price = bs_model.monte_carlo_pricing(num_simulations=int(num_simulations))
         if st.sidebar.button("Run"):
@@ -402,10 +380,12 @@ def main():
         spot_price = st.sidebar.number_input("Stock Price", min_value=0.0, max_value=40000.0, value=nifty_price, step=5.0)
         strike_price = st.sidebar.number_input("Strike Price", value=selected_strike, min_value=1.0, max_value=40000.0, key='selected_strike')
         # st.sidebar.write(f"Time to expiration in Days : **{int(round(time_to_expiry * 365,2)) }**")
-        time_to_expiry_val = st.sidebar.number_input("Time to Expiry (Days)", value=int(round(time_to_expiry * 365,2)), key='time_to_expiry')
-        time_to_expiry=time_to_expiry_val/365
-        volatility = st.sidebar.number_input("Volatility (%)", min_value=0.0, max_value=100.0, value=20.0) / 100
-        risk_free_rate = st.sidebar.number_input("Risk Free Rate (%)", min_value=0.0, max_value=20.0, value=5.0) / 100
+        time_to_expiry_val = st.sidebar.number_input("Time to Expiry (Days)", value=int(round(time_to_expiry * 252,2)), key='time_to_expiry')
+        time_to_expiry=time_to_expiry_val/252
+        # volatility = st.sidebar.number_input("Volatility (%)", min_value=0.0, max_value=100.0, value=20.0) / 100
+        # risk_free_rate = st.sidebar.number_input("Risk Free Rate (%)", min_value=0.0, max_value=20.0, value=5.0) / 100
+        volatility = st.sidebar.slider('Volatility (%)', min_value=1.0, max_value=100.0, value=20.0, step=0.5, key='volatility')
+        risk_free_rate = st.sidebar.slider('Risk Free Rate (%)', min_value=0.0, max_value=20.0, value=5.0, step=0.1, key='risk_free_rate')
         num_steps = st.sidebar.number_input("Number of Steps", value=10, min_value=10, max_value=50, step=10)
 
         bs = BlackScholes(risk_free_rate, spot_price, strike_price, time_to_expiry, volatility)
