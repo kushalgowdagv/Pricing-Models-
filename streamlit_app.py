@@ -384,7 +384,7 @@ def main():
         time_to_expiry=time_to_expiry_val/252
         # volatility = st.sidebar.number_input("Volatility (%)", min_value=0.0, max_value=100.0, value=20.0) / 100
         # risk_free_rate = st.sidebar.number_input("Risk Free Rate (%)", min_value=0.0, max_value=20.0, value=5.0) / 100
-        volatility = st.sidebar.slider('Volatility (%)', min_value=1.0, max_value=100.0, value=20.0, step=0.5, key='volatility')
+        volatility = st.sidebar.slider('Volatility (%)', min_value=1.0, max_value=100.0, value=1.0, step=0.5, key='volatility')
         risk_free_rate = st.sidebar.slider('Risk Free Rate (%)', min_value=0.0, max_value=20.0, value=5.0, step=0.1, key='risk_free_rate')
         num_steps = st.sidebar.number_input("Number of Steps", value=10, min_value=10, max_value=50, step=10)
 
