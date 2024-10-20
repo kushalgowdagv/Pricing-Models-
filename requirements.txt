@@ -5,3 +5,4 @@ datetime
 seaborn
 scipy
 requests
+yfinance
