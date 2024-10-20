@@ -264,35 +264,13 @@ def main():
 
     # Fetching the current price for the selected index
     nifty_price = fetch_data(selected_index)
-
-    # selected_index = st.sidebar.selectbox("Select an underlying asset", options=list(indices_names.keys()), key='underlying_asset')
-    # st.sidebar.write(f"Selected asset: **{indices_names[selected_index]}**")
-
-    # # Fetching the current price for the selected index
-    # spot_price = yf.download(selected_index, interval='1d', period='1d')['Close'].iloc[-1]
-
-    # nifty_price = fetch_data(selected_index)
-
-
-
-    # Fetch current stock price
-    # stock_data = yf.Ticker(selected_index)
-    # current_price = stock_data.history(period='1d').Close.iloc[-1]
-    
-    # st.sidebar.write(f"Current Stock Price: **{current_price:.2f}**")
+)
 
     # Fetch available expirations and strike prices
     strike_prices_data = get_option_strike_prices(selected_index)
     expiration_dates = list(strike_prices_data.keys())
     
-    # # Let user select expiration date
-    # expiration_date = st.sidebar.selectbox(
-    #     "Select Expiration Date", 
-    #     options=expiration_dates, 
-    #     key='expiration_date'
-    # )
-    
-    # st.sidebar.write(f"Selected expiration: **{expiration_date}**")
+
 
     # Get strike prices for the selected expiration
     call_strikes = strike_prices_data[expiration_date]['calls']
