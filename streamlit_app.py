@@ -64,14 +64,24 @@ class BlackScholes:
                 rho = -self.k * self.t * exp_neg_rt * cdf_neg_d2
             else:
                 raise ValueError("Invalid option type. Must be 'Call' or 'Put'.")
+            
+            # Secondary Greeks
+            vanna = vega * (1 - d1 / (self.sigma * sqrt_T))
+            vomma = vega * d1 * d2 / self.sigma
+            charm = -pdf_d1 * (2 * (self.r - 0.5 * self.sigma**2) * self.t - d2 * self.sigma * sqrt_T) / (2 * sqrt_T)
+            zomma = vega * (d1 * d2 - 1) / self.sigma
         
             return {
                 'delta': round(delta, 3),
                 'gamma': round(gamma, 6),
                 'theta': round(theta / 365, 6),  # Convert theta to per-day format
                 'vega': round(vega * 0.01, 6),  # Vega is multiplied by 0.01 to adjust for percentage format
-                'rho': round(rho * 0.01, 6)     # Rho in percentage format
-            }
+                'rho': round(rho * 0.01, 6),     # Rho in percentage format
+                'vanna': round(vanna, 6),
+                'vomma': round(vomma, 6),
+                'charm': round(charm, 6),
+                'zomma': round(zomma, 6)
+                }
 
         except ZeroDivisionError:
             return "Error: Division by zero encountered in Greek calculations."
@@ -99,7 +109,7 @@ class BlackScholes:
         ST = self.s * np.exp((self.r - 0.5 * self.sigma**2) * self.t + self.sigma * np.sqrt(self.t) * Z)
         payoffs = np.maximum(ST - self.k, 0)  # Call options
         option_price = np.exp(-self.r * self.t) * np.mean(payoffs)
-        return option_price
+        return round(option_price,2)
 
     def american_option_pricing(self, s, k, t, r, n, sigma, option_type='call'):
         n = int(n)
@@ -324,7 +334,7 @@ def main():
 
         if st.sidebar.button("Run"): 
             st.sidebar.write(f"Option Price: {option_price}")
-            greek_types = ['delta', 'gamma', 'theta', 'vega', 'rho']
+            greek_types = ['delta', 'gamma', 'theta', 'vega', 'rho', 'vanna', 'vomma', 'charm', 'zomma']  # Added secondary Greeks here
             for greek in greek_types:
                 fig = bs_model.greek_visualisation(option_type, greek)
                 st.plotly_chart(fig)
