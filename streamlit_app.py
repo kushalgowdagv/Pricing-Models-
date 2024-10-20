@@ -99,7 +99,7 @@ class BlackScholes:
         greek_values = [BlackScholes(self.r, s, self.k, self.t, self.sigma).greeks(option_type)[greek] for s in spot_values]
         current_greek_value = BlackScholes(self.r, self.s, self.k, self.t, self.sigma).greeks(option_type)[greek]
         fig.add_trace(go.Scatter(x=spot_values, y=greek_values, mode='lines', name=greek.capitalize(), line=dict(color=line_color, width=3)))
-        fig.add_trace(go.Scatter(x=[self.s], y=[current_greek_value], mode='markers', name=f'Current {greek.capitalize()}', marker=dict(color='black', size=7)))
+        fig.add_trace(go.Scatter(x=[self.s], y=[current_greek_value], mode='markers', name=f'Current {greek.capitalize()}', marker=dict(color='Yellow', size=7)))
         fig.update_layout(title=f'{greek.capitalize()} vs Spot Price ({option_type})', xaxis_title='Spot Price', yaxis_title=greek.capitalize())
         
         return fig
@@ -322,9 +322,10 @@ def main():
         time_to_expiry_val = st.sidebar.number_input("Time to Expiry (Days)", value=int(round(time_to_expiry * 252,2)), key='time_to_expiry')
         time_to_expiry=time_to_expiry_val/252
         option_type = st.selectbox("Option Type", ['Call', 'Put'], key='option_type')
-        # volatility = st.sidebar.number_input('Volatility (%)', min_value=1.0, max_value=100.0, value=20.0, step=0.25, key='volatility')
-        volatility = st.sidebar.slider('Volatility (%)', min_value=1.0, max_value=100.0, value=20.0, step=0.5, key='volatility')
-        risk_free_rate = st.sidebar.slider('Risk Free Rate (%)', min_value=0.0, max_value=20.0, value=5.0, step=0.1, key='risk_free_rate')
+        volatility = st.sidebar.number_input('Volatility (%)', min_value=1.0, max_value=100.0, value=20.0, step=0.5, key='volatility')
+        risk_free_rate = st.sidebar.number_input('Risk Free Rate (%)', min_value=0.0, max_value=20.0, value=5.0, step=0.1, key='risk_free_rate')
+        # volatility = st.sidebar.slider('Volatility (%)', min_value=1.0, max_value=100.0, value=20.0, step=0.5, key='volatility')
+        # risk_free_rate = st.sidebar.slider('Risk Free Rate (%)', min_value=0.0, max_value=20.0, value=5.0, step=0.1, key='risk_free_rate')
         
         st.sidebar.header("Inputs for Black Scholes")
         bs_model = BlackScholes(r=risk_free_rate / 100, s=spot_price, k=strike_price, t=time_to_expiry, sigma=volatility / 100)
@@ -332,12 +333,58 @@ def main():
         
         st.subheader("Greek Visualizations")
 
-        if st.sidebar.button("Run"): 
+        # if st.sidebar.button("Run"): 
+        #     st.sidebar.write(f"Option Price: {option_price}")
+        #     greek_types = ['delta', 'gamma', 'theta', 'vega', 'rho', 'vanna', 'vomma', 'charm', 'zomma']  # Added secondary Greeks here
+        #     for greek in greek_types:
+        #         fig = bs_model.greek_visualisation(option_type, greek)
+        #         st.plotly_chart(fig)
+
+# Main logic for visualization in rows of two columns
+        if st.sidebar.button("Run"):
             st.sidebar.write(f"Option Price: {option_price}")
-            greek_types = ['delta', 'gamma', 'theta', 'vega', 'rho', 'vanna', 'vomma', 'charm', 'zomma']  # Added secondary Greeks here
-            for greek in greek_types:
-                fig = bs_model.greek_visualisation(option_type, greek)
-                st.plotly_chart(fig)
+    
+    # Visualize Delta and Gamma in the first row
+            col1, col2 = st.columns(2)
+            with col1:
+                delta_fig = bs_model.greek_visualisation(option_type, 'delta')
+                st.plotly_chart(delta_fig)
+            with col2:
+                gamma_fig = bs_model.greek_visualisation(option_type, 'gamma')
+                st.plotly_chart(gamma_fig)
+
+    # Visualize Theta and Vega in the second row
+            col3, col4 = st.columns(2)
+            with col3:
+                theta_fig = bs_model.greek_visualisation(option_type, 'theta')
+                st.plotly_chart(theta_fig)
+            with col4:
+                vega_fig = bs_model.greek_visualisation(option_type, 'vega')
+                st.plotly_chart(vega_fig)
+
+    # Visualize Rho and Vanna in the third row
+            col5, col6 = st.columns(2)
+            with col5:
+                rho_fig = bs_model.greek_visualisation(option_type, 'rho')
+                st.plotly_chart(rho_fig)
+            with col6:
+                vanna_fig = bs_model.greek_visualisation(option_type, 'vanna')
+                st.plotly_chart(vanna_fig)
+
+    # Visualize Vomma and Charm in the fourth row
+            col7, col8 = st.columns(2)
+            with col7:
+                vomma_fig = bs_model.greek_visualisation(option_type, 'vomma')
+                st.plotly_chart(vomma_fig)
+            with col8:
+                charm_fig = bs_model.greek_visualisation(option_type, 'charm')
+                st.plotly_chart(charm_fig)
+
+    # Visualize Zomma in the fifth row (it has no pair in this case)
+            col9, _ = st.columns(2)
+            with col9:
+                zomma_fig = bs_model.greek_visualisation(option_type, 'zomma')
+                st.plotly_chart(zomma_fig)
 
     elif option == 'Monte Carlo Simulation':
         st.title("Monte Carlo Simulation Option Pricing and Simulating Asset prices")
@@ -349,10 +396,10 @@ def main():
         # st.sidebar.write(f"Time to expiration in Days : **{int(round(time_to_expiry * 252,2)) }**")
         time_to_expiry_val = st.sidebar.number_input("Time to Expiry (Days)", value=int(round(time_to_expiry * 365,2)), key='time_to_expiry')
         time_to_expiry=time_to_expiry_val/252
-        # volatility = st.sidebar.number_input('Volatility (%)', min_value=1.0, max_value=100.0, value=20.0, step=0.25, key='volatility')
-        # risk_free_rate = st.sidebar.number_input('Risk Free Rate (%)', min_value=0.0, max_value=20.0, value=5.0, step=0.01, key='risk_free_rate')
-        volatility = st.sidebar.slider('Volatility (%)', min_value=1.0, max_value=100.0, value=20.0, step=0.5, key='volatility')
-        risk_free_rate = st.sidebar.slider('Risk Free Rate (%)', min_value=0.0, max_value=20.0, value=5.0, step=0.1, key='risk_free_rate')
+        volatility = st.sidebar.number_input('Volatility (%)', min_value=1.0, max_value=100.0, value=20.0, step=0.5, key='volatility')
+        risk_free_rate = st.sidebar.number_input('Risk Free Rate (%)', min_value=0.0, max_value=20.0, value=5.0, step=0.1, key='risk_free_rate')
+        # volatility = st.sidebar.slider('Volatility (%)', min_value=1.0, max_value=100.0, value=20.0, step=0.5, key='volatility')
+        # risk_free_rate = st.sidebar.slider('Risk Free Rate (%)', min_value=0.0, max_value=20.0, value=5.0, step=0.1, key='risk_free_rate')
         bs_model = BlackScholes(r=risk_free_rate / 100, s=spot_price, k=strike_price, t=time_to_expiry, sigma=volatility / 100)
         monte_carlo_price = bs_model.monte_carlo_pricing(num_simulations=int(num_simulations))
         if st.sidebar.button("Run"):
@@ -370,10 +417,10 @@ def main():
         # st.sidebar.write(f"Time to expiration in Days : **{int(round(time_to_expiry * 365,2)) }**")
         time_to_expiry_val = st.sidebar.number_input("Time to Expiry (Days)", value=int(round(time_to_expiry * 252,2)), key='time_to_expiry')
         time_to_expiry=time_to_expiry_val/252
-        # volatility = st.sidebar.number_input("Volatility (%)", min_value=0.0, max_value=100.0, value=20.0) / 100
-        # risk_free_rate = st.sidebar.number_input("Risk Free Rate (%)", min_value=0.0, max_value=20.0, value=5.0) / 100
-        volatility = st.sidebar.slider('Volatility (%)', min_value=1.0, max_value=100.0, value=1.0, step=0.5, key='volatility')
-        risk_free_rate = st.sidebar.slider('Risk Free Rate (%)', min_value=0.0, max_value=20.0, value=5.0, step=0.1, key='risk_free_rate')
+        volatility = st.sidebar.number_input("Volatility (%)", min_value=0.0, max_value=100.0, value=20.0) / 100
+        risk_free_rate = st.sidebar.number_input("Risk Free Rate (%)", min_value=0.0, max_value=20.0, value=5.0) / 100
+        # volatility = st.sidebar.slider('Volatility (%)', min_value=1.0, max_value=100.0, value=1.0, step=0.5, key='volatility')
+        # risk_free_rate = st.sidebar.slider('Risk Free Rate (%)', min_value=0.0, max_value=20.0, value=5.0, step=0.1, key='risk_free_rate')
         num_steps = st.sidebar.number_input("Number of Steps", value=10, min_value=10, max_value=50, step=10)
 
         bs = BlackScholes(risk_free_rate, spot_price, strike_price, time_to_expiry, volatility)
@@ -394,4 +441,4 @@ st.sidebar.text("")
 st.sidebar.text("")
 col1, col2 = st.sidebar.columns(2)
 col1.text("Linkedin:")
-col1.page_link("https://www.linkedin.com/in/kushalgowdagv/",label="Kushal Gowda G V")
+col1.page_link("https://www.linkedin.com/in/kushalgowdagv/",label="Kushal Gowda")
