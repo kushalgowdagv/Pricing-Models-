@@ -264,7 +264,7 @@ def main():
 
     # Fetching the current price for the selected index
     nifty_price = fetch_data(selected_index)
-)
+
 
     # Fetch available expirations and strike prices
     strike_prices_data = get_option_strike_prices(selected_index)
