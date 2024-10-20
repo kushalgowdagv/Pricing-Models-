@@ -302,7 +302,7 @@ def main():
     
     # Create a select box to allow users to choose a strike price
     selected_strike = st.sidebar.selectbox(
-        "Select Strike Price (Closest to Spot Price Highlighted)", 
+        "Select Strike Price (Closest to Spot Price)", 
         options=sorted(call_strikes), 
         index=call_strikes.index(closest_strike), 
         key='strike_price'
@@ -329,7 +329,7 @@ def main():
         st.title("Black-Scholes Option Pricing and Greek Visualizations")
         st.sidebar.header("Inputs")
         spot_price = st.sidebar.number_input('Stock Price', min_value=1.0, max_value=40000.0, value=nifty_price, step=5.0, key='spot_price')
-        strike_price = st.sidebar.number_input("Strike Price", value=selected_strike, min_value=1.0, max_value=40000.0, key='selected_strike')
+        # strike_price = st.sidebar.number_input("Strike Price", value=selected_strike, min_value=1.0, max_value=40000.0, key='selected_strike')
         # st.sidebar.write(f"Time to expiration in Days : **{int(round(time_to_expiry * 252,2)) }**")
         time_to_expiry_val = st.sidebar.number_input("Time to Expiry (Days)", value=int(round(time_to_expiry * 252,2)), key='time_to_expiry')
         time_to_expiry=time_to_expiry_val/252
@@ -357,7 +357,7 @@ def main():
         num_steps = st.sidebar.number_input("Number of Steps", value=252, min_value=1, key='num_steps_mc')
         num_simulations = st.sidebar.number_input("Number of Simulations", value=1000, min_value=500, max_value=2000, step=100, key='num_simulations')
         spot_price = st.sidebar.number_input('Stock Price', min_value=1.0, max_value=40000.0, value=nifty_price, step=5.0, key='spot_price')
-        strike_price = st.sidebar.number_input("Strike Price", value=selected_strike, min_value=1.0, max_value=40000.0, key='selected_strike')
+        # strike_price = st.sidebar.number_input("Strike Price", value=selected_strike, min_value=1.0, max_value=40000.0, key='selected_strike')
         # st.sidebar.write(f"Time to expiration in Days : **{int(round(time_to_expiry * 252,2)) }**")
         time_to_expiry_val = st.sidebar.number_input("Time to Expiry (Days)", value=int(round(time_to_expiry * 365,2)), key='time_to_expiry')
         time_to_expiry=time_to_expiry_val/252
@@ -376,9 +376,9 @@ def main():
         st.sidebar.header("Inputs")
         st.title("Binomial Option Pricing and Forecasting Asset Prices")
 
-        option_type = st.selectbox("Option Type", ['Call', 'Put'], key='option_type')
+        # option_type = st.selectbox("Option Type", ['Call', 'Put'], key='option_type')
         spot_price = st.sidebar.number_input("Stock Price", min_value=0.0, max_value=40000.0, value=nifty_price, step=5.0)
-        strike_price = st.sidebar.number_input("Strike Price", value=selected_strike, min_value=1.0, max_value=40000.0, key='selected_strike')
+        # strike_price = st.sidebar.number_input("Strike Price", value=selected_strike, min_value=1.0, max_value=40000.0, key='selected_strike')
         # st.sidebar.write(f"Time to expiration in Days : **{int(round(time_to_expiry * 365,2)) }**")
         time_to_expiry_val = st.sidebar.number_input("Time to Expiry (Days)", value=int(round(time_to_expiry * 252,2)), key='time_to_expiry')
         time_to_expiry=time_to_expiry_val/252
