@@ -286,7 +286,9 @@ def main():
     call_strikes = strike_prices_data[expiration_date]['calls']
     
     # Find the closest strike price to the current stock price
+    call_strikes = call_strikes.tolist() if isinstance(call_strikes, pd.Series) else call_strikes
     closest_strike = min(call_strikes, key=lambda x: abs(x - nifty_price))
+
     
     # Create a select box to allow users to choose a strike price
     selected_strike = st.sidebar.selectbox(
