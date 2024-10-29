@@ -199,7 +199,7 @@ def fetch_data(selected_index):
         nifty_latest = round(nifty_latest.Close.iloc[-1], 1)
         return nifty_latest
     except:
-        return 25000.0 
+        return ["No Price available"] 
     
 def fetch_expiry_dates(selected_index):
     """Fetches expiry dates for the selected index if available."""
@@ -274,6 +274,7 @@ def main():
 
     # Fetching the current price for the selected index
     nifty_price = fetch_data(selected_index)
+    nifty_price = float(nifty_price.iloc[0]) if isinstance(nifty_price, pd.Series) else float(nifty_price)
 
 
     # Fetch available expirations and strike prices
@@ -286,8 +287,8 @@ def main():
     call_strikes = strike_prices_data[expiration_date]['calls']
     
     # Find the closest strike price to the current stock price
-    call_strikes = call_strikes.tolist() if isinstance(call_strikes, pd.Series) else call_strikes
-    closest_strike = min(call_strikes, key=lambda x: abs(x - nifty_price))
+    call_strikes = list(call_strikes) if isinstance(call_strikes, pd.Series) else call_strikes
+    closest_strike = min(call_strikes, key=lambda x: abs(float(x) - nifty_price))
 
     
     # Create a select box to allow users to choose a strike price
