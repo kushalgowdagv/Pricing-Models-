@@ -273,41 +273,71 @@ def main():
     st.sidebar.write(f"Selected expiration: **{expiration_date}**")
 
     # Fetching the current price for the selected index
+    # nifty_price = fetch_data(selected_index)
+    # nifty_price = float(nifty_price.iloc[-1]) if isinstance(nifty_price, pd.Series) and not nifty_price.empty else None
+    # if nifty_price is not None:
+    #     # Proceed with calculations if nifty_price is valid
+    #     strike_prices_data = get_option_strike_prices(selected_index)
+    #     expiration_dates = list(strike_prices_data.keys())
+    
+    #     # Safeguard to check call_strikes is not empty
+    #     call_strikes = strike_prices_data.get(expiration_date, {}).get('calls', [])
+    #     if call_strikes:
+    #         closest_strike = min(call_strikes, key=lambda x: abs(float(x) - nifty_price))
+
+    # # Fetch available expirations and strike prices
+    # # strike_prices_data = get_option_strike_prices(selected_index)
+    # # expiration_dates = list(strike_prices_data.keys())
+    
+
+
+    # # Get strike prices for the selected expiration
+    # # call_strikes = strike_prices_data[expiration_date]['calls']
+    
+    # # Find the closest strike price to the current stock price
+    # # call_strikes = list(call_strikes) if isinstance(call_strikes, pd.Series) else call_strikes
+    # # closest_strike = min(call_strikes, key=lambda x: abs(float(x) - nifty_price))
+
+    
+    # # Create a select box to allow users to choose a strike price
+    # selected_strike = st.sidebar.selectbox(
+    #     "Select Strike Price (Closest to Spot Price)", 
+    #     options=sorted(call_strikes), 
+    #     index=call_strikes.index(closest_strike), 
+    #     key='strike_price'
+    # )
+    
+    # st.sidebar.write(f"Selected strike price: **{selected_strike:.2f}**")
+
+    # Fetching the current price for the selected index
     nifty_price = fetch_data(selected_index)
-    nifty_price = float(nifty_price.iloc[-1]) if isinstance(nifty_price, pd.Series) and not nifty_price.empty else None
-    if nifty_price is not None:
-        # Proceed with calculations if nifty_price is valid
+    nifty_price = float(nifty_price) if nifty_price is not None else None
+    if nifty_price:
+        # Fetch available expirations and strike prices
         strike_prices_data = get_option_strike_prices(selected_index)
-        expiration_dates = list(strike_prices_data.keys())
-    
-        # Safeguard to check call_strikes is not empty
-        call_strikes = strike_prices_data.get(expiration_date, {}).get('calls', [])
-        if call_strikes:
-            closest_strike = min(call_strikes, key=lambda x: abs(float(x) - nifty_price))
+        
+        # Ensure expiration date and call strikes are valid before proceeding
+        if expiration_date in strike_prices_data:
+            call_strikes = strike_prices_data.get(expiration_date, {}).get('calls', [])
+            
+            if call_strikes:
+                closest_strike = min(call_strikes, key=lambda x: abs(float(x) - nifty_price))
+            else:
+                st.write("No call strikes available for the selected expiration date.")
+                return  # Exit if no strike prices are available
+        else:
+            st.write("Invalid expiration date or no data available.")
+            return
 
-    # Fetch available expirations and strike prices
-    # strike_prices_data = get_option_strike_prices(selected_index)
-    # expiration_dates = list(strike_prices_data.keys())
-    
+        # Proceed only if `call_strikes` contains valid data
+        selected_strike = st.sidebar.selectbox(
+            "Select Strike Price (Closest to Spot Price)", 
+            options=sorted(call_strikes), 
+            index=call_strikes.index(closest_strike) if call_strikes else 0
+        )
+        
+        st.sidebar.write(f"Selected strike price: **{selected_strike:.2f}**")
 
-
-    # Get strike prices for the selected expiration
-    # call_strikes = strike_prices_data[expiration_date]['calls']
-    
-    # Find the closest strike price to the current stock price
-    # call_strikes = list(call_strikes) if isinstance(call_strikes, pd.Series) else call_strikes
-    # closest_strike = min(call_strikes, key=lambda x: abs(float(x) - nifty_price))
-
-    
-    # Create a select box to allow users to choose a strike price
-    selected_strike = st.sidebar.selectbox(
-        "Select Strike Price (Closest to Spot Price)", 
-        options=sorted(call_strikes), 
-        index=call_strikes.index(closest_strike), 
-        key='strike_price'
-    )
-    
-    st.sidebar.write(f"Selected strike price: **{selected_strike:.2f}**")
 
     # Now, you can proceed with further calculations using the selected strike price
     st.title("Option Pricing Simulation")
