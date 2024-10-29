@@ -274,21 +274,29 @@ def main():
 
     # Fetching the current price for the selected index
     nifty_price = fetch_data(selected_index)
-    nifty_price = float(nifty_price.iloc[0]) if isinstance(nifty_price, pd.Series) else float(nifty_price)
-
+    nifty_price = float(nifty_price.iloc[-1]) if isinstance(nifty_price, pd.Series) and not nifty_price.empty else None
+    if nifty_price is not None:
+        # Proceed with calculations if nifty_price is valid
+        strike_prices_data = get_option_strike_prices(selected_index)
+        expiration_dates = list(strike_prices_data.keys())
+    
+        # Safeguard to check call_strikes is not empty
+        call_strikes = strike_prices_data.get(expiration_date, {}).get('calls', [])
+        if call_strikes:
+            closest_strike = min(call_strikes, key=lambda x: abs(float(x) - nifty_price))
 
     # Fetch available expirations and strike prices
-    strike_prices_data = get_option_strike_prices(selected_index)
-    expiration_dates = list(strike_prices_data.keys())
+    # strike_prices_data = get_option_strike_prices(selected_index)
+    # expiration_dates = list(strike_prices_data.keys())
     
 
 
     # Get strike prices for the selected expiration
-    call_strikes = strike_prices_data[expiration_date]['calls']
+    # call_strikes = strike_prices_data[expiration_date]['calls']
     
     # Find the closest strike price to the current stock price
-    call_strikes = list(call_strikes) if isinstance(call_strikes, pd.Series) else call_strikes
-    closest_strike = min(call_strikes, key=lambda x: abs(float(x) - nifty_price))
+    # call_strikes = list(call_strikes) if isinstance(call_strikes, pd.Series) else call_strikes
+    # closest_strike = min(call_strikes, key=lambda x: abs(float(x) - nifty_price))
 
     
     # Create a select box to allow users to choose a strike price
